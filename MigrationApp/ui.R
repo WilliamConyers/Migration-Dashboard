@@ -11,23 +11,48 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-
+    
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+    titlePanel(h1("Refugee Migration", align = "center")),
+    
+    tabsetPanel(
+        
+        tabPanel( "Profiler",
+                  fluid = TRUE,
+                  sidebarLayout(
+                      sidebarPanel(
+                          sliderInput("years",
+                                      "Timeperiod:",
+                                      min = 1975,
+                                      max = 2016,
+                                      sep = "",
+                                      value = c(2000,2016)
+                                      ),
+                          selectInput("Country",
+                                      "Select Country:",
+                                      choices = NULL),
+                          ),
+                      mainPanel(
+                          plotlyOutput("yearPlot")
+                          )
+                      )
         ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("distPlot")
+        
+        tabPanel( "Second Tab",
+                  fluid = TRUE,
+                  sidebarLayout(
+                      sidebarPanel(
+                          sliderInput("bins",
+                                      "NUMBER of bins:",
+                                      min = 1,
+                                      max = 50,
+                                      value = 30)
+                      ),
+                      mainPanel(
+                          plotOutput("distPlot")
+                      )
+                  )
         )
+        
     )
 ))
