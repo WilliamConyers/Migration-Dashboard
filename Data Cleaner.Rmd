@@ -1,0 +1,87 @@
+---
+title: "Data Cleaner"
+author: "William Conyers"
+date: "12/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+path <- "./refugeedata2016.csv"
+data <- read_csv(path)
+data <- data %>%
+  rename(Residence = "Country or territory of asylum or residence",
+         Origin = "Country or territory of origin",
+         Refugees = "Refugees<sup>*</sup>",
+         RefugeeLike = "Total refugees and people in refugee-like situations<sup>**</sup>") %>%
+  select(-c("Refugees assisted by UNHCR", "Total refugees and people in refugee-like situations assisted by UNHCR"))
+
+data1 <- data %>% mutate(Residence=fct_recode(Residence, 
+                            "Antigua" = "Antigua and Barbuda",
+                            "Bolivia" = "Bolivia (Plurinational State of)",
+                            "Central African Republic"="Central African Rep.",
+                            "Republic of Congo" = "Congo",
+                            "Ivory Coast" = "Côte d'Ivoire",
+                            "Curacao"="Curaçao",
+                            "Democratic Republic of the Congo" = "Dem. Rep. of the Congo",
+                            "Dominican Republic" = "Dominican Rep.",
+                            "Hong Kong"="Hong Kong SAR, China",
+                            "Iran"="Islamic Rep. of Iran",
+                            "Micronesia"="Micronesia (Federated States of)",
+                            "South Korea"="Rep. of Korea",
+                            "Moldova"="Rep. of Moldova",
+                            "Russia"="Russian Federation",
+                            "Serbia"="Serbia (and Kosovo: S/RES/1244 (1999))",
+                            "Syria"="Syrian Arab Rep.",
+                            "Macedonia"="The former Yugoslav Rep. of Macedonia",
+                            "Trinidad"="Trinidad and Tobago",
+                            "UK"="United Kingdom",
+                            "Tanzania"="United Rep. of Tanzania",
+                            "USA"="United States",
+                            "Venezuela"="Venezuela (Bolivarian Republic of)",
+                            "Vietnam"="Viet Nam",
+                            "Czech Republic"="Czechia",
+                            "Sint Maarten"="Sint Maarten (Dutch part)",
+                            "Virgin Islands"="British Virgin Islands",
+                            "Saint Kitts"="Saint Kitts and Nevis",
+                            "Laos"="Lao People's Dem. Rep.")
+                         ) %>%
+  mutate(Origin=fct_recode(Origin, 
+                            "Antigua" = "Antigua and Barbuda",
+                            "Bolivia" = "Bolivia (Plurinational State of)",
+                            "Central African Republic"="Central African Rep.",
+                            "Republic of Congo" = "Congo",
+                            "Ivory Coast" = "Côte d'Ivoire",
+                            "Curacao"="Curaçao",
+                            "Democratic Republic of the Congo" = "Dem. Rep. of the Congo",
+                            "Dominican Republic" = "Dominican Rep.",
+                            "Hong Kong"="Hong Kong SAR, China",
+                            "Iran"="Islamic Rep. of Iran",
+                            "Micronesia"="Micronesia (Federated States of)",
+                            "South Korea"="Rep. of Korea",
+                            "Moldova"="Rep. of Moldova",
+                            "Russia"="Russian Federation",
+                            "Serbia"="Serbia (and Kosovo: S/RES/1244 (1999))",
+                            "Syria"="Syrian Arab Rep.",
+                            "Macedonia"="The former Yugoslav Rep. of Macedonia",
+                            "Trinidad"="Trinidad and Tobago",
+                            "UK"="United Kingdom",
+                            "Tanzania"="United Rep. of Tanzania",
+                            "USA"="United States",
+                            "Venezuela"="Venezuela (Bolivarian Republic of)",
+                            "Vietnam"="Viet Nam",
+                            "Czech Republic"="Czechia",
+                            "Sint Maarten"="Sint Maarten (Dutch part)",
+                            "Virgin Islands"="British Virgin Islands",
+                            "Saint Kitts"="Saint Kitts and Nevis",
+                            "Laos"="Lao People's Dem. Rep.")
+                         )
+
+
+write.csv(data1,"refugees.csv")
+```
+
