@@ -1,31 +1,51 @@
 #
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# Server for Refugee Migration Dashboard
+# 
 
 library(shiny)
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(function(input, output,session) {
     
     #read in data from local file
     path <- "refugees.csv"
     data <- read_csv(path)[,2:5] 
     
+    #populate country will all the possible country choices
+    observeEvent(input$countryyes,{
+        if(input$countryyes) {
+            mychoices <- unique(c(data$Residence, data$Origin))
+            updateSelectInput(session, "country", choices=c("All Countries", mychoices))
+        }
+    })
+    
+    #get current country from selectInput
+    country <- reactive({
+        input$country
+    })
+    
+    #plot of yearly refugee totals
     output$yearPlot <- renderPlotly({
         
         #transform data set to get refugee totals my year, in the specified data range
-        data1 <- data %>%
-            group_by(Year) %>%
-            summarise(YearTotal = sum(Refugees, na.rm = T)) %>%
-            filter(Year >= input$years[1],
-                   Year <= input$years[2])
+        #Different charts for if an individual country is specified
+        if (input$countryyes & input$country != "All Countries") {
+            currentcountry <- country()
+            data1 <- data %>%
+                filter(Origin==currentcountry) %>%
+                group_by(Year) %>%
+                summarise(YearTotal = sum(Refugees, na.rm = T)) %>%
+                filter(Year >= input$years[1],
+                       Year <= input$years[2])
+        } else {
+            data1 <- data %>%
+                group_by(Year) %>%
+                summarise(YearTotal = sum(Refugees, na.rm = T)) %>%
+                filter(Year >= input$years[1],
+                       Year <= input$years[2])
+        }
         
-        #Make plot of yearly totals
+        #Make plot in plotly
         plot_ly(data=data1,
                 type="bar",
                 # line = list(width=2, color="firebrick"),
@@ -44,7 +64,6 @@ shinyServer(function(input, output) {
                    )
     })
     
-
 
     output$distPlot <- renderPlot({
 

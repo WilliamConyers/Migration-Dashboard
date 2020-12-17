@@ -20,6 +20,8 @@ data <- data %>%
          RefugeeLike = "Total refugees and people in refugee-like situations<sup>**</sup>") %>%
   select(-c("Refugees assisted by UNHCR", "Total refugees and people in refugee-like situations assisted by UNHCR"))
 
+
+#match country names for use in ggplot
 data1 <- data %>% mutate(Residence=fct_recode(Residence, 
                             "Antigua" = "Antigua and Barbuda",
                             "Bolivia" = "Bolivia (Plurinational State of)",
@@ -80,6 +82,14 @@ data1 <- data %>% mutate(Residence=fct_recode(Residence,
                             "Saint Kitts"="Saint Kitts and Nevis",
                             "Laos"="Lao People's Dem. Rep.")
                          )
+
+#Add collumns for totals both in leaving and coming
+data2 <- data1 %>%
+  group_by(Year,Origin) %>%
+  mutate(Generated = sum(Refugees, na.rm = TRUE)) %>%
+  ungroup() %>%
+  group_by(Year,Residence) %>%
+  mutate(Accepted = sum(Refugees, na.rm = TRUE))
 
 
 write.csv(data1,"refugees.csv")
