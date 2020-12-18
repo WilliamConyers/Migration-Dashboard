@@ -32,10 +32,13 @@ shinyServer(function(input, output,session) {
     #plot of yearly refugee totals
     output$yearPlot <- renderPlotly({
         
+        #worldquestion is helpful for determining the titles of the plots
+        worldquestion = F
+        currentcountry <- country()
+        
         #transform data set to get refugee totals my year, in the specified data range
         #Different charts for if an individual country is specified
         if (input$countryyes & input$country != "All Countries") {
-            currentcountry <- country()
             data1 <- data %>%
                 filter(Origin==currentcountry) %>%
                 group_by(Year) %>%
@@ -43,6 +46,7 @@ shinyServer(function(input, output,session) {
                 filter(Year >= input$years[1],
                        Year <= input$years[2])
         } else {
+            worldquestion = T
             data1 <- data %>%
                 group_by(Year) %>%
                 summarise(YearTotal = sum(Refugees, na.rm = T)) %>%
@@ -62,7 +66,7 @@ shinyServer(function(input, output,session) {
                 hoverinfo = 'text',
                 hoverlabel = list(bgcolor="white", bordercolor="firebrick")
                 ) %>%
-            layout(title=list(text="Yearly Refugee Counts", xref="paper"),
+            layout(title=list(text=ifelse(worldquestion,"Yearly World Refugee Counts", paste0("Yearly Refugees from ", currentcountry)), xref="paper"),
                    yaxis=list(title="Total Refugees"),
                    xaxis=list(title="Year")
                    )
@@ -72,8 +76,12 @@ shinyServer(function(input, output,session) {
     #plot of destination countries
     output$destPlot <- renderPlotly({
         
+        #worldquestion is helpful for determining the titles of the plots
+        worldquestion = F
+        currentcountry <- country()
+        
+        #create data set, depending on region, for refugee destination totals
         if (input$countryyes & input$country != "All Countries") {
-            currentcountry <- country()
             data2 <- data %>%
                 filter(Origin==currentcountry) %>%
                 filter(Year >= input$years[1],
@@ -82,6 +90,7 @@ shinyServer(function(input, output,session) {
                 summarise(destTotals = sum(Refugees)) %>%
                 arrange(-destTotals)
         } else {
+            worldquestion = T
             data2 <- data %>%
                 filter(Year >= input$years[1],
                        Year <= input$years[2]) %>%
@@ -100,12 +109,13 @@ shinyServer(function(input, output,session) {
                 type="pie",
                 values = ~destTotals,
                 labels = ~Residence) %>%
-            layout(title=list(text="Where Refugees Went", xref = "paper"),
+            layout(title=list(text=ifelse(worldquestion,"Where Refugees are Now", paste0("Where Refugees from ", currentcountry," are Now ")), xref = "paper"),
                    legend = list(orientation = "h",   # show entries horizontally
                                  xanchor = "center",  # use center of legend as anchor
                                  x = 0.5))             # put legend in center of x-axis)
     })
     
+    #Make a value box for the total number of refugees from selected region
     output$totalnumber <- renderValueBox({
         startyear = input$years[1]
         endyear = input$years[2]
@@ -129,66 +139,43 @@ shinyServer(function(input, output,session) {
         )
     })
 
+    mapOrigin = read_csv("dataOrigin.csv")
+    mapResidence = read_csv("dataResidence.csv")
 
-    
-    # 
-    # 
-    # 
-    # 
-    # 
-    # #read in data for world map
-    # world <- map_data("world")
-    # 
-    # #originMap is a world chloroplast map showing number of refugees coming from each country.
-    # output$originMap <- renderPlot({
-    # 
-    #     #make data set for Origin map
-    #     dataOrigin = data %>%
-    #         group_by(Origin, Year) %>%
-    #         summarise(Generated = sum(Refugees, na.rm=TRUE)) %>%
-    #         filter(Year >= input$years2[1],
-    #                Year <= input$years2[2])
-    #     mapOrigin <- left_join(world,dataOrigin,by=c("region"="Origin"))
-    # 
-    #     #make map
-    #     ggplot(mapOrigin, aes(x=long, y=lat, group=group, fill=Generated)) +
-    #         geom_polygon(color = "white", size=0.2) +
-    #         theme_void() +
-    #         scale_fill_gradient(low="white",
-    #                             high="firebrick",
-    #                             trans = "log") +
-    #         labs(title="Refugees Produced by Country",
-    #              subtitle = "",
-    #              fill="Number of \nRefugees") +
-    #         theme(plot.title = element_text(hjust = 0.5, size = 15),
-    #               legend.position = c(0.15, 0.35))
-    # 
-    # })
-    # 
-    # #residenceMap is a world chloroplast map showing number of refugees accepted by each country.
-    # output$residenceMap <- renderPlot({
-    # 
-    #     #make data set for Origin map
-    #     dataResidence = data %>%
-    #         group_by(Residence, Year) %>%
-    #         summarise(Accepted = sum(Refugees, na.rm=TRUE)) %>%
-    #         filter(Year >= input$years2[1],
-    #                Year <= input$years2[2])
-    #     mapResidence <- left_join(world,dataResidence,by=c("region"="Residence"))
-    # 
-    #     #make map
-    #     ggplot(mapResidence, aes(x=long, y=lat, group=group, fill=Accepted)) +
-    #         geom_polygon(color = "white", size=0.2) +
-    #         theme_void() +
-    #         scale_fill_gradient(low="white",
-    #                             high="blue",
-    #                             trans = "log") +
-    #         labs(title="Refugees Accepted by Country",
-    #              subtitle = "",
-    #              fill="Number of \nRefugees") +
-    #         theme(plot.title = element_text(hjust = 0.5, size = 15),
-    #               legend.position = c(0.15, 0.35))
-    # 
-    # })
+    #originMap is a world chloroplast map showing number of refugees coming from each country.
+    output$originMap <- renderPlot({
+
+        #make map
+        ggplot(mapOrigin, aes(x=long, y=lat, group=group, fill=Generated/1000000)) +
+            geom_polygon(color = "lightgrey", size=.2) +
+            theme_void() +
+            scale_fill_gradient(low="white",
+                                high="firebrick",
+                                na.value="white") +
+            labs(title="Refugees by Country of Origin",
+                 subtitle = "",
+                 fill="Number of \nRefugees \n(Millions)") +
+            theme(plot.title = element_text(hjust = 0.5, size = 15),
+                  legend.position = c(0.15, 0.35))
+
+    })
+
+    #residenceMap is a world chloroplast map showing number of refugees accepted by each country.
+    output$residenceMap <- renderPlot({
+
+        #make map
+        ggplot(mapResidence, aes(x=long, y=lat, group=group, fill=Accepted/1000000)) +
+            geom_polygon(color = "lightgrey", size=.2) +
+            theme_void() +
+            scale_fill_gradient(low="white",
+                                high="midnightblue",
+                                na.value="white") +
+            labs(title="Refugees by Country of Asylum",
+                 subtitle = "",
+                 fill="Number of \nRefugees \n(Millions)") +
+            theme(plot.title = element_text(hjust = 0.5, size = 15),
+                  legend.position = c(0.15, 0.35))
+
+    })
 
 })
