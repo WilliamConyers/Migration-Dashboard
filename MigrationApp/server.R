@@ -13,7 +13,7 @@ library(shinydashboard)
 shinyServer(function(input, output,session) {
     
     #read in data from local file
-    path <- "refugees.csv"
+    path <- "refugees1.csv"
     data <- read_csv(path)[,2:5] 
     
     #populate country will all the possible country choices
@@ -79,28 +79,27 @@ shinyServer(function(input, output,session) {
         #worldquestion is helpful for determining the titles of the plots
         worldquestion = F
         currentcountry <- country()
+        currentyear = input$years[2]
         
         #create data set, depending on region, for refugee destination totals
         if (input$countryyes & input$country != "All Countries") {
             data2 <- data %>%
                 filter(Origin==currentcountry) %>%
-                filter(Year >= input$years[1],
-                       Year <= input$years[2]) %>%
+                filter(Year == currentyear) %>%
                 group_by(Residence) %>%
                 summarise(destTotals = sum(Refugees)) %>%
                 arrange(-destTotals)
         } else {
             worldquestion = T
             data2 <- data %>%
-                filter(Year >= input$years[1],
-                       Year <= input$years[2]) %>%
+                filter(Year == currentyear) %>%
                 group_by(Residence) %>%
                 summarise(destTotals = sum(Refugees)) %>%
                 arrange(-destTotals)
         }
         
         #make top 10 and then other
-        data3 <- data2 %>% top_n(10)
+        data3 <- data2 %>% top_n(7)
         othervalue = sum(data2$destTotals, na.rm=TRUE) - sum(data3$destTotals, na.rm=TRUE)
         data4 <- add_row(data3, Residence="Other",destTotals=othervalue)
         
@@ -109,7 +108,7 @@ shinyServer(function(input, output,session) {
                 type="pie",
                 values = ~destTotals,
                 labels = ~Residence) %>%
-            layout(title=list(text=ifelse(worldquestion,"Where Refugees are Now", paste0("Where Refugees from ", currentcountry," are Now ")), xref = "paper"),
+            layout(title=list(text=ifelse(worldquestion,paste0("Where Refugees were in ",currentyear), paste0("Where Refugees from ", currentcountry," were in ", currentyear)), xref = "paper"),
                    legend = list(orientation = "h",   # show entries horizontally
                                  xanchor = "center",  # use center of legend as anchor
                                  x = 0.5))             # put legend in center of x-axis)
@@ -117,11 +116,9 @@ shinyServer(function(input, output,session) {
     
     #Make a value box for the total number of refugees from selected region
     output$totalnumber <- renderValueBox({
-        startyear = input$years[1]
         endyear = input$years[2]
         data5 <- data %>%
-            filter(Year >= startyear,
-                   Year <= endyear)
+            filter(Year == endyear)
         if (input$countryyes & input$country != "All Countries") {
             currentcountry <- country()
             data6 <- data5 %>%
@@ -134,7 +131,7 @@ shinyServer(function(input, output,session) {
         }
         valueBox(
             value = formatC(numref, format="d", big.mark=","),
-            subtitle = paste0("Number of Refugees From ", region, " between ", startyear, " and ", endyear, "."),
+            subtitle = paste0("Number of Refugees from ", region, " living abroad in ", endyear),
             color = "yellow"
         )
     })
@@ -152,7 +149,7 @@ shinyServer(function(input, output,session) {
             scale_fill_gradient(low="white",
                                 high="firebrick",
                                 na.value="white") +
-            labs(title="Refugees by Country of Origin",
+            labs(title="Current Refugees by Country of Origin",
                  subtitle = "",
                  fill="Number of \nRefugees \n(Millions)") +
             theme(plot.title = element_text(hjust = 0.5, size = 15),
@@ -170,7 +167,7 @@ shinyServer(function(input, output,session) {
             scale_fill_gradient(low="white",
                                 high="midnightblue",
                                 na.value="white") +
-            labs(title="Refugees by Country of Asylum",
+            labs(title="Current Refugees by Country of Asylum",
                  subtitle = "",
                  fill="Number of \nRefugees \n(Millions)") +
             theme(plot.title = element_text(hjust = 0.5, size = 15),

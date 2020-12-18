@@ -83,7 +83,7 @@ data1 <- data %>% mutate(Residence=fct_recode(Residence,
                             "Laos"="Lao People's Dem. Rep.")
                          )
 
-#Add collumns for totals both in leaving and coming
+#Add collumns for totals both in leaving and coming. Not used
 data2 <- data1 %>%
   group_by(Year,Origin) %>%
   mutate(Generated = sum(Refugees, na.rm = TRUE)) %>%
@@ -93,5 +93,167 @@ data2 <- data1 %>%
 
 
 write.csv(data1,"refugees.csv")
+```
+
+```{r}
+library(maps)
+world <- map_data("world")
+
+dataOrigin = dataa1 %>%
+  filter(Year == 2019) %>%
+  group_by(Origin) %>%
+  summarize(Generated = sum(Refugees, na.rm=TRUE))
+mapOrigin <- left_join(world,dataOrigin,by=c("region"="Origin"))
+
+dataResidence = dataa1 %>%
+  filter(Year == 2019) %>%
+  group_by(Residence) %>%
+  summarize(Accepted = sum(Refugees, na.rm=TRUE))
+mapResidence <- left_join(world,dataResidence,by=c("region"="Residence"))
+
+write.csv(mapOrigin,"dataOrigin.csv")
+write.csv(mapResidence,"dataResidence.csv")
+```
+
+```{r}
+path="/Users/williamconyers/Desktop/Stat 310/MigrationDashboard/MigrationApp/population.csv"
+dataa=read_csv(path) %>%
+  rename(Residence = "Country of asylum",
+         Origin = "Country of origin") 
+
+setdiff(dataa$Residence, unique(world$region))
+unique(world$region)
+dataa1 <- dataa %>% mutate(Residence=fct_recode(Residence, 
+                            "Antigua" = "Antigua and Barbuda",
+                            "Bolivia" = "Bolivia (Plurinational State of)",
+                            "Central African Republic"="Central African Rep.",
+                            "Republic of Congo" = "Congo",
+                            "Ivory Coast" = "Côte d'Ivoire",
+                            "Curacao"="Curaçao",
+                            "Democratic Republic of the Congo" = "Dem. Rep. of the Congo",
+                            "Dominican Republic" = "Dominican Rep.",
+                            "Hong Kong"="Hong Kong SAR, China",
+                            "Iran"="Islamic Rep. of Iran",
+                            "Micronesia"="Micronesia (Federated States of)",
+                            "South Korea"="Rep. of Korea",
+                            "Moldova"="Rep. of Moldova",
+                            "Russia"="Russian Federation",
+                            "Serbia"="Serbia (and Kosovo: S/RES/1244 (1999))",
+                            "Syria"="Syrian Arab Rep.",
+                            "Macedonia"="The former Yugoslav Rep. of Macedonia",
+                            "Trinidad"="Trinidad and Tobago",
+                            "UK"="United Kingdom",
+                            "Tanzania"="United Rep. of Tanzania",
+                            "USA"="United States of America",
+                            "Venezuela"="Venezuela (Bolivarian Republic of)",
+                            "Vietnam"="Viet Nam",
+                            "Czech Republic"="Czechia",
+                            "Sint Maarten"="Sint Maarten (Dutch part)",
+                            "Virgin Islands"="British Virgin Islands",
+                            "Saint Kitts"="Saint Kitts and Nevis",
+                            "Laos"="Lao People's Dem. Rep.")
+                         ) %>%
+  mutate(Origin=fct_recode(Origin, 
+                            "Antigua" = "Antigua and Barbuda",
+                            "Bolivia" = "Bolivia (Plurinational State of)",
+                            "Central African Republic"="Central African Rep.",
+                            "Republic of Congo" = "Congo",
+                            "Ivory Coast" = "Côte d'Ivoire",
+                            "Curacao"="Curaçao",
+                            "Democratic Republic of the Congo" = "Dem. Rep. of the Congo",
+                            "Dominican Republic" = "Dominican Rep.",
+                            "Hong Kong"="Hong Kong SAR, China",
+                            "Iran"="Islamic Rep. of Iran",
+                            "Micronesia"="Micronesia (Federated States of)",
+                            "South Korea"="Rep. of Korea",
+                            "Moldova"="Rep. of Moldova",
+                            "Russia"="Russian Federation",
+                            "Serbia"="Serbia (and Kosovo: S/RES/1244 (1999))",
+                            "Syria"="Syrian Arab Rep.",
+                            "Macedonia"="The former Yugoslav Rep. of Macedonia",
+                            "Trinidad"="Trinidad and Tobago",
+                            "UK"="United Kingdom",
+                            "Tanzania"="United Rep. of Tanzania",
+                            "USA"="United States",
+                            "Venezuela"="Venezuela (Bolivarian Republic of)",
+                            "Vietnam"="Viet Nam",
+                            "Czech Republic"="Czechia",
+                            "Sint Maarten"="Sint Maarten (Dutch part)",
+                            "Virgin Islands"="British Virgin Islands",
+                            "Saint Kitts"="Saint Kitts and Nevis",
+                            "Laos"="Lao People's Dem. Rep.",
+                           )
+                         )
+
+write.csv(dataa1, "refugees1.csv")
+```
+
+```{r}
+path="/Users/williamconyers/Desktop/Stat 310/MigrationDashboard/MigrationApp/population.csv"
+dataa=read_csv(path) %>%
+  rename(Residence = "Country of asylum",
+         Origin = "Country of origin") 
+
+dataa1 <- dataa %>% mutate(Residence=fct_recode(Residence,
+                                                "Central African Republic" = "Central African Rep.",
+                                                "Republic of Congo" = "Congo",
+                                                "Democratic Republic of the Congo" = "Dem. Rep. of the Congo",
+                                                "Dominican Republic" = "Dominican Rep.",
+                                                "UK"= "United Kingdom of Great Britain and Northern Ireland",
+                                                "China" = "China, Hong Kong SAR",
+                                                "China" = "China, Macao SAR",
+                                                "Serbia"="Serbia and Kosovo: S/RES/1244 (1999)",
+                                                "Tanzania"="United Rep. of Tanzania",
+                                                "USA"="United States of America",
+                                                "Venezuela"="Venezuela (Bolivarian Republic of)",
+                                                "Ivory Coast" = "Cote d'Ivoire",
+                                                "Vietnam"="Viet Nam",
+                                                "Bolivia" = "Bolivia (Plurinational State of)",
+                                                "Syria"="Syrian Arab Rep.",
+                                                "Laos"="Lao People's Dem. Rep.",
+                                                "South Korea"="Rep. of Korea",
+                                                "Iran"="Iran (Islamic Rep. of)",
+                                                "Cape Verde"="Cabo Verde",
+                                                "Czech Republic"="Czechia",
+                                                "Macedonia"="North Macedonia",
+                                                "Russia"="Russian Federation",
+                                                "Moldova"="Rep. of Moldova",
+                                                "Trinidad"="Trinidad and Tobago",
+                                                "Sint Maarten"="Sint Maarten (Dutch part)",
+                                                "Antigua" = "Antigua and Barbuda",
+                                                "Micronesia"="Micronesia (Federated States of)",
+                                                "Saint Kitts"="Saint Kitts and Nevis")) %>%
+  mutate(Origin=fct_recode(Origin,
+                                                "Central African Republic" = "Central African Rep.",
+                                                "Republic of Congo" = "Congo",
+                                                "Democratic Republic of the Congo" = "Dem. Rep. of the Congo",
+                                                "Dominican Republic" = "Dominican Rep.",
+                                                "UK"= "United Kingdom of Great Britain and Northern Ireland",
+                                                "China" = "China, Hong Kong SAR",
+                                                "China" = "China, Macao SAR",
+                                                "Serbia"="Serbia and Kosovo: S/RES/1244 (1999)",
+                                                "Tanzania"="United Rep. of Tanzania",
+                                                "USA"="United States of America",
+                                                "Venezuela"="Venezuela (Bolivarian Republic of)",
+                                                "Ivory Coast" = "Cote d'Ivoire",
+                                                "Vietnam"="Viet Nam",
+                                                "Bolivia" = "Bolivia (Plurinational State of)",
+                                                "Syria"="Syrian Arab Rep.",
+                                                "Laos"="Lao People's Dem. Rep.",
+                                                "South Korea"="Rep. of Korea",
+                                                "Iran"="Iran (Islamic Rep. of)",
+                                                "Cape Verde"="Cabo Verde",
+                                                "Czech Republic"="Czechia",
+                                                "Macedonia"="North Macedonia",
+                                                "Russia"="Russian Federation",
+                                                "Moldova"="Rep. of Moldova",
+                                                "Trinidad"="Trinidad and Tobago",
+                                                "Sint Maarten"="Sint Maarten (Dutch part)",
+                                                "Antigua" = "Antigua and Barbuda",
+                                                "Micronesia"="Micronesia (Federated States of)",
+                                                "Saint Kitts"="Saint Kitts and Nevis"))
+
+write.csv(dataa1, "refugees1.csv")
+                                                
 ```
 
