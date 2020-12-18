@@ -4,6 +4,7 @@
 
 library(shiny)
 library(plotly)
+library(shinydashboard)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -40,7 +41,14 @@ shinyUI(fluidPage(
                           ),
                       
                       mainPanel(
-                          plotlyOutput("yearPlot")
+                          fluidRow(
+                              valueBoxOutput(width=10, "totalnumber"),
+                              ),
+                          hr(),
+                          br(),
+                          fluidRow(
+                              splitLayout(cellWidths = c("50%", "50%"), plotlyOutput("yearPlot"), plotlyOutput("destPlot"))
+                          )
                           )
                       )
         ),
@@ -58,8 +66,8 @@ shinyUI(fluidPage(
                           ),
                       ),
                       mainPanel(
-                          plotOutput("originMap"),
-                          plotOutput("residenceMap")
+                          # plotOutput("originMap"),
+                          # plotOutput("residenceMap")
                       )
                   )
         )
